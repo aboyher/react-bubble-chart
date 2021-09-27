@@ -1,7 +1,8 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
+import _ from 'lodash';
 
 /**
  * ExampleComponent is an example component.
@@ -14,11 +15,14 @@ export default class BubbleChart extends Component {
     constructor(props) {
         super(props);
         this.renderChart = this.renderChart.bind(this);
+        this._renderChartCalled = false;
         this.renderBubbles = this.renderBubbles.bind(this);
         // this.renderLegend = this.renderLegend.bind(this);
     }
+
     componentDidMount() {
         this.svg = ReactDOM.findDOMNode(this);
+        
         this.renderChart();
     }
 
@@ -32,45 +36,40 @@ export default class BubbleChart extends Component {
         }
     }
 
+
+
     render() {
         const {
             width,
             height,
         } = this.props;
         return (
-            // <div>
-                <svg width={width} height={height} />
-                // <div class="tolltip"></div>
-            // </div>
+            <svg width={width} height={height} />
         )
     }
 
     renderChart() {
         const {
             overflow,
-            // graph,
             data,
             height,
             width,
             padding,
-            // legendPercentage,
+            // setProps
         } = this.props;
+        // console.log(this.props)
+
         // Reset the svg element to a empty state.
         this.svg.innerHTML = '';
         // Allow bubbles overflowing its SVG container in visual aspect if props(overflow) is true.
-        if (overflow){
-            this.svg.style.overflow = "visible";
-        }
-        else {
-            this.svg.style.overflow = "hidden";
-        }
+
+        this.svg.style.overflow = "hidden";
 
         const bubblesWidth = width;
         const bubblesHeight = height;
         const color = d3.scaleOrdinal(d3.schemeCategory20c);
 
         const pack = d3.pack()
-            // .size([bubblesWidth * graph.zoom, bubblesWidth * graph.zoom])
             .size([bubblesWidth, bubblesHeight])
             .padding(padding);
 
@@ -88,26 +87,50 @@ export default class BubbleChart extends Component {
         // Pass the data to the pack layout to calculate the distribution.
         const nodes = pack(root).leaves();
 
+
         // Call to the function that draw the bubbles.
         this.renderBubbles(bubblesWidth, bubblesHeight, nodes, color);
-        // Call to the function that draw the legend.
-        // if (showLegend) {
-        //     this.renderLegend(legendWidth, height, bubblesWidth, nodes, color);
-        // }
+
     }
 
     renderBubbles(width, height, nodes, color) {
         const {
-            // graph,
             data,
-            bubbleClickFun,
             valueFont,
             labelFont,
+            setProps,
         } = this.props;
+
+
+        const tooltip = d3.select(this.svg).append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "2px")
+            .style("border-radius", "5px")
+            .style("padding", "5px")
+
+        var mouseover = function (d) {
+            d3.select(this).style("stroke-width", 5);
+            tooltip
+                .style("opacity", 1)
+        }
+        var mousemove = function (d) {
+            tooltip
+                .html('<u>' + d.key + '</u>' + "<br>" + d.value + " inhabitants")
+                .style("left", (d3.mouse(this)[0] + 20) + "px")
+                .style("top", (d3.mouse(this)[1]) + "px")
+        }
+        var mouseleave = function (d) {
+            d3.select(this).style('stroke-width', 0);
+            tooltip
+                .style("opacity", 0)
+        }
 
         const bubbleChart = d3.select(this.svg).append("g")
             .attr("class", "bubble-chart")
-        
+
         // const tooltip = d3.select(this.)
         const node = bubbleChart.selectAll(".node")
             .data(nodes)
@@ -115,22 +138,24 @@ export default class BubbleChart extends Component {
             .attr("class", "node")
             .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
             .on("click", function (d) {
-                bubbleClickFun(d.label);
-            });
+                if (typeof setProps === 'function') {
+                    setProps({ selectedNode: d.label })
+                }
+                
+            })
+            
 
         node.append("circle")
             .attr("id", function (d) { return d.id; })
             .attr("r", function (d) { return d.r - (d.r * .04); })
             .style("fill", function (d) { return d.data.color ? d.data.color : color(nodes.indexOf(d)); })
             .attr('stroke', "black")
-            .style('stroke-width',0)
+            .style('stroke-width', 0)
             .style("z-index", 1)
-            .on('mouseover', function (d) {
-                d3.select(this).style("stroke-width", 5);
-            })
-            .on('mouseout', function (d) {
-                d3.select(this).style('stroke-width',0);
-            });
+            .on('mouseover', mouseover)
+            .on('mouseout', mouseleave)
+            .on("mousemove", mousemove)
+            
 
         node.append("clipPath")
             .attr("id", function (d) { return "clip-" + d.id; })
@@ -193,6 +218,7 @@ export default class BubbleChart extends Component {
             .attr("y", function (d) {
                 return labelFont.size / 2
             })
+            .attr('pointer-events','none')
 
         // Center the texts inside the circles.
         d3.selectAll(".value-text").attr("x", function (d) {
@@ -206,100 +232,22 @@ export default class BubbleChart extends Component {
                 } else {
                     return -valueFont.size * 0.5;
                 }
-            });
+            })
+        .attr('pointer-events','none')
 
         node.append("title")
             .text(function (d) { return d.label; });
 
+
     }
 
-    // renderLegend(width, height, offset, nodes, color) {
-    //     const {
-    //         data,
-    //         legendClickFun,
-    //         legendFont,
-    //     } = this.props;
-    //     const bubble = d3.select('.bubble-chart');
-    //     const bubbleHeight = bubble.node().getBBox().height;
 
-    //     const legend = d3.select(this.svg).append("g")
-    //         .attr("transform", function () { return `translate(${offset},${(bubbleHeight) * 0.05})`; })
-    //         .attr("class", "legend");
-
-    //     let textOffset = 0;
-    //     const texts = legend.selectAll(".legend-text")
-    //         .data(nodes)
-    //         .enter()
-    //         .append("g")
-    //         .attr("transform", (d, i) => {
-    //             const offset = textOffset;
-    //             textOffset += legendFont.size + 10;
-    //             return `translate(0,${offset})`;
-    //         })
-    //         .on('mouseover', function (d) {
-    //             d3.select('#' + d.id).attr("r", d.r * 1.04);
-    //         })
-    //         .on('mouseout', function (d) {
-    //             const r = d.r - (d.r * 0.04);
-    //             d3.select('#' + d.id).attr("r", r);
-    //         })
-    //         .on("click", function (d) {
-    //             legendClickFun(d.label);
-    //         });;
-
-    //     texts.append("rect")
-    //         .attr("width", 30)
-    //         .attr("height", legendFont.size)
-    //         .attr("x", 0)
-    //         .attr("y", -legendFont.size)
-    //         .style("fill", "transparent");
-
-    //     texts.append("rect")
-    //         .attr("width", legendFont.size)
-    //         .attr("height", legendFont.size)
-    //         .attr("x", 0)
-    //         .attr("y", -legendFont.size)
-    //         .style("fill", function (d) { return d.data.color ? d.data.color : color(nodes.indexOf(d)); });
-
-    //     texts.append("text")
-    //         .style("font-size", `${legendFont.size}px`)
-    //         .style("font-weight", (d) => {
-    //             return legendFont.weight ? legendFont.weight : 600;
-    //         })
-    //         .style("font-family", legendFont.family)
-    //         .style("fill", () => {
-    //             return legendFont.color ? legendFont.color : '#000';
-    //         })
-    //         .style("stroke", () => {
-    //             return legendFont.lineColor ? legendFont.lineColor : '#000';
-    //         })
-    //         .style("stroke-width", () => {
-    //             return legendFont.lineWeight ? legendFont.lineWeight : 0;
-    //         })
-    //         .attr("x", (d) => { return legendFont.size + 10 })
-    //         .attr("y", 0)
-    //         .text((d) => { return d.label });
-    // }
 }
 
 BubbleChart.defaultProps = {
-    overflow: false,
-    // graph: {
-    //     zoom: 1.1,
-    //     offsetX: -0.05,
-    //     offsetY: -0.01,
-    // },
     width: 1000,
     height: 800,
     padding: 0,
-    showLegend: true,
-    // legendPercentage: 20,
-    // legendFont: {
-    //     family: 'Arial',
-    //     size: 12,
-    //     color: '#000',
-    //     weight: 'bold',
-    // },
     valueFont: {
         family: 'Arial',
         size: 16,
@@ -312,49 +260,36 @@ BubbleChart.defaultProps = {
         color: '#fff',
         weight: 'normal',
     },
-    // bubbleClickFun: (label) => { console.log(`Bubble ${label} is clicked ...`) },
-    // legendClickFun: (label) => { console.log(`Legend ${label} is clicked ...`) }
+
 };
 
 BubbleChart.propTypes = {
     /**
      * The ID used to identify this component in Dash callbacks.
      */
-    // data: PropTypes.arrayOf(
-    //     PropTypes.shape(
-    //         { 
-    //             text: PropTypes.string.isRequired, 
-    //             value: PropTypes.number.isRequired 
-    //         }
-    //     )
-    // ),
+    data: PropTypes.arrayOf(
+        PropTypes.shape(
+            {
+                text: PropTypes.string.isRequired,
+                value: PropTypes.number.isRequired
+            }
+        )
+    ),
     id: PropTypes.string,
     setProps: PropTypes.func,
     data: PropTypes.arrayOf(
         PropTypes.shape(
-            { 
-                label: PropTypes.string.isRequired, 
-                value: PropTypes.number.isRequired 
+            {
+                label: PropTypes.string.isRequired,
+                value: PropTypes.number.isRequired
             }
         )
     ),
     overflow: PropTypes.bool,
-    // graph: PropTypes.shape({
-    //     zoom: PropTypes.number,
-    //     offsetX: PropTypes.number,
-    //     offsetY: PropTypes.number,
-    // }),
     width: PropTypes.number,
     height: PropTypes.number,
     padding: PropTypes.number,
     showLegend: PropTypes.bool,
-    // legendPercentage: PropTypes.number,
-    // legendFont: PropTypes.shape({
-    //     family: PropTypes.string,
-    //     size: PropTypes.number,
-    //     color: PropTypes.string,
-    //     weight: PropTypes.string,
-    // }),
     valueFont: PropTypes.shape({
         family: PropTypes.string,
         size: PropTypes.number,
@@ -367,4 +302,5 @@ BubbleChart.propTypes = {
         color: PropTypes.string,
         weight: PropTypes.string,
     }),
+    selectedNode: PropTypes.string,
 };

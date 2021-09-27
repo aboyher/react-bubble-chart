@@ -12,8 +12,8 @@ displays it.
 It renders an input with the property `value`
 which is editable by the user.
 Keyword arguments:
-- `id` (String; optional): The ID used to identify this component in Dash callbacks.
-- `data` (optional): . data has the following type: Array of lists containing elements 'label', 'value'.
+- `id` (String; optional)
+- `data` (optional): The ID used to identify this component in Dash callbacks.. data has the following type: Array of lists containing elements 'label', 'value'.
 Those elements have the following types:
   - `label` (String; required)
   - `value` (Real; required)s
@@ -26,6 +26,7 @@ Those elements have the following types:
   - `weight` (String; optional)
 - `overflow` (Bool; optional)
 - `padding` (Real; optional)
+- `selectedNode` (String; optional)
 - `showLegend` (Bool; optional)
 - `valueFont` (optional): . valueFont has the following type: lists containing elements 'family', 'size', 'color', 'weight'.
 Those elements have the following types:
@@ -36,7 +37,7 @@ Those elements have the following types:
 - `width` (Real; optional)
 """
 function ''_bubblechart(; kwargs...)
-        available_props = Symbol[:id, :data, :height, :labelFont, :overflow, :padding, :showLegend, :valueFont, :width]
+        available_props = Symbol[:id, :data, :height, :labelFont, :overflow, :padding, :selectedNode, :showLegend, :valueFont, :width]
         wild_props = Symbol[]
         return Component("''_bubblechart", "BubbleChart", "dash_react_bubble_chart", available_props, wild_props; kwargs...)
 end

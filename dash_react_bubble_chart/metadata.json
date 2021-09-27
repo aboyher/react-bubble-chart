@@ -36,20 +36,6 @@
       }
     ],
     "props": {
-      "id": {
-        "type": {
-          "name": "string"
-        },
-        "required": false,
-        "description": "The ID used to identify this component in Dash callbacks."
-      },
-      "setProps": {
-        "type": {
-          "name": "func"
-        },
-        "required": false,
-        "description": ""
-      },
       "data": {
         "type": {
           "name": "arrayOf",
@@ -68,6 +54,20 @@
           }
         },
         "required": false,
+        "description": "The ID used to identify this component in Dash callbacks."
+      },
+      "id": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": ""
+      },
+      "setProps": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
         "description": ""
       },
       "overflow": {
@@ -75,11 +75,7 @@
           "name": "bool"
         },
         "required": false,
-        "description": "",
-        "defaultValue": {
-          "value": "false",
-          "computed": false
-        }
+        "description": ""
       },
       "width": {
         "type": {
@@ -119,11 +115,7 @@
           "name": "bool"
         },
         "required": false,
-        "description": "",
-        "defaultValue": {
-          "value": "true",
-          "computed": false
-        }
+        "description": ""
       },
       "valueFont": {
         "type": {
@@ -182,6 +174,13 @@
           "value": "{\r\n    family: 'Arial',\r\n    size: 11,\r\n    color: '#fff',\r\n    weight: 'normal',\r\n}",
           "computed": false
         }
+      },
+      "selectedNode": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": ""
       }
     }
   }

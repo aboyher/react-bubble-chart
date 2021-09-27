@@ -11,17 +11,17 @@ ExampleComponent is an example component. It takes a property, `label`, and di
 
 \usage{
 ''BubbleChart(id=NULL, data=NULL, height=NULL, labelFont=NULL,
-overflow=NULL, padding=NULL, showLegend=NULL,
-valueFont=NULL, width=NULL)
+overflow=NULL, padding=NULL, selectedNode=NULL,
+showLegend=NULL, valueFont=NULL, width=NULL)
 }
 
 \arguments{
-\item{id}{Character. The ID used to identify this component in Dash callbacks.}
+\item{id}{Character. }
 
 \item{data}{List of lists containing elements 'label', 'value'.
 those elements have the following types:
   - label (character; required)
-  - value (numeric; required)s. }
+  - value (numeric; required)s. The ID used to identify this component in Dash callbacks.}
 
 \item{height}{Numeric. }
 
@@ -35,6 +35,8 @@ those elements have the following types:
 \item{overflow}{Logical. }
 
 \item{padding}{Numeric. }
+
+\item{selectedNode}{Character. }
 
 \item{showLegend}{Logical. }
 

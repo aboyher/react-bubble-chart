@@ -1,8 +1,8 @@
 # AUTO GENERATED FILE - DO NOT EDIT
 
-''BubbleChart <- function(id=NULL, data=NULL, height=NULL, labelFont=NULL, overflow=NULL, padding=NULL, showLegend=NULL, valueFont=NULL, width=NULL) {
+''BubbleChart <- function(id=NULL, data=NULL, height=NULL, labelFont=NULL, overflow=NULL, padding=NULL, selectedNode=NULL, showLegend=NULL, valueFont=NULL, width=NULL) {
     
-    props <- list(id=id, data=data, height=height, labelFont=labelFont, overflow=overflow, padding=padding, showLegend=showLegend, valueFont=valueFont, width=width)
+    props <- list(id=id, data=data, height=height, labelFont=labelFont, overflow=overflow, padding=padding, selectedNode=selectedNode, showLegend=showLegend, valueFont=valueFont, width=width)
     if (length(props) > 0) {
         props <- props[!vapply(props, is.null, logical(1))]
     }
@@ -10,7 +10,7 @@
         props = props,
         type = 'BubbleChart',
         namespace = 'dash_react_bubble_chart',
-        propNames = c('id', 'data', 'height', 'labelFont', 'overflow', 'padding', 'showLegend', 'valueFont', 'width'),
+        propNames = c('id', 'data', 'height', 'labelFont', 'overflow', 'padding', 'selectedNode', 'showLegend', 'valueFont', 'width'),
         package = 'dashReactBubbleChart'
         )
 
